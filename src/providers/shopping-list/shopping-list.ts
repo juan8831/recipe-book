@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Ingredient } from '../../models/ingredient';
+import { HttpClient } from '@angular/common/http';
+import { AuthProvider } from '../auth/auth';
 
 
 @Injectable()
@@ -7,8 +9,16 @@ export class ShoppingListProvider {
 
   private shoppingList: Ingredient[] = [];
 
-  constructor() {
+  constructor(
+    private http : HttpClient,
+    private authProvider: AuthProvider
+  ) {
     console.log('Hello ShoppingListProvider Provider');
+  }
+
+  setShoppingList(list: Ingredient[])
+  {
+    this.shoppingList = list;
   }
 
   getShoppingList()
@@ -41,6 +51,21 @@ export class ShoppingListProvider {
   removeItemAtIndex(index: number)
   {
     this.shoppingList.splice(index, 1);
+  }
+
+  storeList(token: string){
+    const userId = this.authProvider.getActiveUser().uid;
+    const url = 'https://recipebook-968cf.firebaseio.com/' + userId + '/shopping_list.json?' 
+    + 'auth=' + token;
+    return this.http.put(url, this.shoppingList );
+  }
+
+  fetchList(token: string){
+    const userId = this.authProvider.getActiveUser().uid;
+    const url = 'https://recipebook-968cf.firebaseio.com/' + userId + '/shopping_list.json?' 
+    + 'auth=' + token;
+    return this.http.get(url );
+
   }
 
 }
